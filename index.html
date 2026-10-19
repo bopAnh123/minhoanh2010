@@ -1,0 +1,737 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <!-- Màu thanh trình duyệt trên điện thoại (để ảnh chụp màn hình đồng bộ tông hồng) -->
+  <meta name="theme-color" content="#fde8ee" />
+  <title>Gửi Em Ngày 20/10</title>
+
+  <!-- Google Fonts: Playfair Display (tiêu đề) + Quicksand (nội dung) – đều hỗ trợ tiếng Việt -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,500;1,600&family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+  <style>
+    /* =========================================================
+       ĐỔI MÀU CHỦ ĐẠO TẠI ĐÂY
+       Chỉ cần sửa các biến bên dưới, toàn bộ thiệp (nút, viền,
+       trái tim, cánh hoa, chữ nhấn…) sẽ tự đổi theo.
+       ========================================================= */
+    :root {
+      --pink:       #f4a7b9;  /* Hồng pastel chủ đạo */
+      --pink-deep:  #e07a95;  /* Hồng đậm – nút bấm, chữ nhấn */
+      --pink-soft:  #fde4ea;  /* Hồng rất nhạt – nền phụ */
+      --cream:      #fff7ef;  /* Kem – nền chính */
+      --white:      #fffdfb;  /* Trắng ấm – khung ảnh, thẻ thiệp */
+      --ink:        #5b3c47;  /* Màu chữ chính */
+      --ink-soft:   #8d6b76;  /* Màu chữ phụ, caption */
+
+      --radius: 28px;
+      --shadow-soft: 0 18px 40px -18px color-mix(in srgb, var(--ink) 40%, transparent);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; }
+
+    html, body { margin: 0; padding: 0; }
+
+    body {
+      min-height: 100vh;
+      font-family: "Quicksand", system-ui, sans-serif;
+      color: var(--ink);
+      background-color: var(--cream);
+      background-image:
+        radial-gradient(circle at 12% 8%, var(--pink-soft) 0, transparent 42%),
+        radial-gradient(circle at 90% 92%, var(--pink-soft) 0, transparent 40%),
+        linear-gradient(180deg, #fff5f7 0%, var(--cream) 100%);
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ---------- Nền: trái tim & cánh hoa rơi ---------- */
+    .sky {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      overflow: hidden;
+      z-index: 0;
+    }
+    .fall {
+      position: absolute;
+      top: -40px;
+      opacity: var(--op);
+      animation: fall var(--dur) linear var(--delay) infinite;
+      will-change: transform;
+    }
+    .sway {
+      display: block;
+      width: var(--size);
+      height: var(--size);
+      animation: sway var(--sway) ease-in-out infinite alternate;
+    }
+    .petal {
+      height: calc(var(--size) * 1.15);
+      border-radius: 150% 0 150% 0;
+      background: linear-gradient(135deg, #fff0f3, var(--pink));
+    }
+    .heart { color: var(--pink); }
+    .heart svg, .burst__piece svg { display: block; width: 100%; height: 100%; fill: currentColor; }
+
+    @keyframes fall {
+      to { transform: translate3d(0, calc(100vh + 80px), 0); }
+    }
+    @keyframes sway {
+      from { transform: translateX(calc(var(--drift) * -1)) rotate(-25deg); }
+      to   { transform: translateX(var(--drift)) rotate(35deg); }
+    }
+
+    /* ---------- Bố cục chung ---------- */
+    .stage {
+      position: relative;
+      z-index: 1;
+      min-height: 100vh;
+      min-height: 100svh;
+      display: grid;
+      place-items: center;
+      padding: 16px;
+    }
+
+    /* ---------- Màn hình bìa (trước khi mở) ---------- */
+    .cover {
+      text-align: center;
+      max-width: 560px;
+    }
+    .cover > * { animation: fadeUp 1s cubic-bezier(.2, .8, .2, 1) both; }
+    .cover > :nth-child(2) { animation-delay: .15s; }
+    .cover > :nth-child(3) { animation-delay: .3s; }
+    .cover > :nth-child(4) { animation-delay: .45s; }
+    .cover > :nth-child(5) { animation-delay: .6s; }
+
+    .cover.is-leaving { animation: coverOut .5s ease forwards; }
+
+    .cover__to {
+      margin: 0 0 6px;
+      font-family: "Playfair Display", serif;
+      font-style: italic;
+      font-size: 1.15rem;
+      color: var(--pink-deep);
+    }
+    .cover__title {
+      margin: 0 0 14px;
+      font-family: "Playfair Display", serif;
+      font-weight: 700;
+      font-size: clamp(1.9rem, 8vw, 3.1rem);
+      line-height: 1.15;
+    }
+    .cover__sub {
+      margin: 0 0 28px;
+      color: var(--ink-soft);
+      font-weight: 500;
+    }
+
+    /* Phong bì */
+    .envelope-float { animation: fadeUp 1s both, float 5s ease-in-out 1s infinite; }
+    .envelope {
+      position: relative;
+      width: min(220px, 58vw);
+      aspect-ratio: 3 / 2;
+      margin: 0 auto 30px;
+      perspective: 800px;
+    }
+    .envelope__back,
+    .envelope__front {
+      position: absolute;
+      inset: 0;
+      border-radius: 14px;
+    }
+    .envelope__back {
+      background: linear-gradient(160deg, color-mix(in srgb, var(--pink) 70%, white), var(--pink));
+      box-shadow: var(--shadow-soft);
+    }
+    .envelope__letter {
+      position: absolute;
+      left: 8%; right: 8%; top: 8%; bottom: 6%;
+      z-index: 1;
+      display: grid;
+      place-items: start center;
+      padding-top: 10%;
+      border-radius: 8px;
+      background: var(--white);
+      font-family: "Playfair Display", serif;
+      font-style: italic;
+      font-size: 1.2rem;
+      color: var(--pink-deep);
+      transition: transform .8s cubic-bezier(.2, .8, .2, 1) .35s;
+    }
+    .envelope__front {
+      z-index: 2;
+      background: linear-gradient(160deg, var(--pink-soft), color-mix(in srgb, var(--pink) 45%, white));
+      clip-path: polygon(0 0, 50% 55%, 100% 0, 100% 100%, 0 100%);
+    }
+    .envelope__flap {
+      position: absolute;
+      left: 0; right: 0; top: 0;
+      height: 62%;
+      z-index: 3;
+      border-radius: 14px 14px 0 0;
+      background: linear-gradient(180deg, color-mix(in srgb, var(--pink) 80%, white), var(--pink));
+      clip-path: polygon(0 0, 100% 0, 50% 100%);
+      transform-origin: top;
+      transition: transform .6s ease, z-index 0s .3s;
+    }
+    .envelope__seal {
+      position: absolute;
+      left: 50%; top: 62%;
+      z-index: 4;
+      width: 42px; height: 42px;
+      display: grid;
+      place-items: center;
+      border-radius: 50%;
+      color: #fff;
+      background: radial-gradient(circle at 35% 30%, color-mix(in srgb, var(--pink-deep) 70%, white), var(--pink-deep));
+      box-shadow: 0 4px 12px color-mix(in srgb, var(--pink-deep) 45%, transparent);
+      transform: translate(-50%, -50%);
+      transition: opacity .3s, transform .3s;
+    }
+    .envelope__seal svg { width: 18px; height: 18px; fill: currentColor; }
+
+    .is-opening .envelope__flap   { transform: rotateX(180deg); z-index: 0; }
+    .is-opening .envelope__seal   { opacity: 0; transform: translate(-50%, -50%) scale(.4); }
+    .is-opening .envelope__letter { transform: translateY(-48%); }
+
+    /* Nút "Mở thiệp" */
+    .btn {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 15px 36px;
+      border: 0;
+      border-radius: 999px;
+      font: 700 1.05rem "Quicksand", sans-serif;
+      letter-spacing: .02em;
+      color: #fff;
+      background: linear-gradient(135deg, var(--pink), var(--pink-deep));
+      box-shadow: 0 12px 26px -10px color-mix(in srgb, var(--pink-deep) 80%, transparent);
+      cursor: pointer;
+      transition: transform .25s ease, box-shadow .25s ease, opacity .3s;
+    }
+    .btn::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      animation: pulse 2.4s ease-out infinite;
+    }
+    .btn svg { width: 18px; height: 18px; fill: currentColor; }
+    .btn:hover { transform: translateY(-2px); box-shadow: 0 16px 30px -10px color-mix(in srgb, var(--pink-deep) 85%, transparent); }
+    .btn:active { transform: translateY(0) scale(.97); }
+    .btn:focus-visible { outline: 3px solid color-mix(in srgb, var(--pink-deep) 45%, transparent); outline-offset: 4px; }
+    .is-opening .btn { opacity: 0; pointer-events: none; }
+
+    /* ---------- Tấm thiệp (sau khi mở) ---------- */
+    .card {
+      position: relative;
+      width: 100%;
+      max-width: 440px;
+      padding: 24px 18px 22px;
+      text-align: center;
+      border-radius: var(--radius);
+      background: color-mix(in srgb, var(--white) 90%, transparent);
+      -webkit-backdrop-filter: blur(8px);
+      backdrop-filter: blur(8px);
+      box-shadow: var(--shadow-soft), 0 0 0 1px color-mix(in srgb, var(--pink) 30%, transparent);
+      outline: none;
+    }
+    /* Viền trong mảnh tạo cảm giác thiệp in */
+    .card::before {
+      content: "";
+      position: absolute;
+      inset: 9px;
+      border: 1px solid color-mix(in srgb, var(--pink) 40%, transparent);
+      border-radius: calc(var(--radius) - 9px);
+      pointer-events: none;
+    }
+
+    .reveal { opacity: 0; }
+    .card.is-open .reveal {
+      animation: fadeUp .9s cubic-bezier(.2, .8, .2, 1) both;
+      animation-delay: calc(var(--i, 0) * 150ms);
+    }
+
+    .card__eyebrow {
+      margin: 0;
+      font-size: .74rem;
+      font-weight: 700;
+      letter-spacing: .28em;
+      text-transform: uppercase;
+      color: var(--pink-deep);
+    }
+    .card__title {
+      margin: 8px 0 0;
+      font-family: "Playfair Display", serif;
+      font-weight: 700;
+      font-size: clamp(1.55rem, 6.8vw, 2.6rem);
+      line-height: 1.2;
+    }
+    .accent {
+      font-style: italic;
+      background: linear-gradient(135deg, var(--pink-deep), var(--pink));
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+
+    .divider {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      margin: 12px 0 6px;
+      color: var(--pink);
+    }
+    .divider::before,
+    .divider::after {
+      content: "";
+      width: 52px;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--pink));
+    }
+    .divider::after { transform: scaleX(-1); }
+    .divider svg { width: 14px; height: 14px; fill: currentColor; }
+
+    /* Khu vực ảnh polaroid */
+    .photos {
+      display: flex;
+      justify-content: center;
+      gap: clamp(20px, 4vw, 44px);
+      margin: 22px 0 22px;
+    }
+    .photo {
+      --pw: min(250px, 34vw); /* chiều rộng mỗi ảnh */
+      width: var(--pw);
+      opacity: 0;
+    }
+    .card.is-open .photo {
+      animation:
+        popIn .9s cubic-bezier(.2, .8, .2, 1) both,
+        float 6s ease-in-out infinite;
+      animation-delay: calc(var(--i) * 150ms), calc(var(--i) * 150ms + 1s);
+    }
+    .card.is-open .photo:nth-child(2) { animation-delay: calc(var(--i) * 150ms), calc(var(--i) * 150ms + 2.5s); }
+
+    .polaroid {
+      --r: 0deg;
+      --lift: 0px;
+      --s: 1;
+      position: relative;
+      margin: 0;
+      padding: 9px 9px 0;
+      border-radius: 16px;
+      background: var(--white);
+      border: 1px solid color-mix(in srgb, var(--pink) 22%, white);
+      box-shadow:
+        0 16px 30px -16px color-mix(in srgb, var(--ink) 50%, transparent),
+        0 2px 6px color-mix(in srgb, var(--ink) 8%, transparent);
+      transform: translateY(var(--lift)) rotate(var(--r)) scale(var(--s));
+      transition: transform .5s cubic-bezier(.2, .8, .2, 1), box-shadow .5s;
+    }
+    .photo:nth-child(1) .polaroid { --r: -5deg; }
+    .photo:nth-child(2) .polaroid { --r: 4deg; }
+
+    /* Miếng băng dính washi trên đầu ảnh */
+    .polaroid::before {
+      content: "";
+      position: absolute;
+      top: -9px;
+      left: 50%;
+      width: 38%;
+      height: 18px;
+      border-radius: 2px;
+      background: color-mix(in srgb, var(--pink) 55%, transparent);
+      transform: translateX(-50%) rotate(-4deg);
+      z-index: 1;
+    }
+    .photo:nth-child(2) .polaroid::before { transform: translateX(-50%) rotate(5deg); }
+
+    .polaroid img {
+      display: block;
+      width: 100%;
+      aspect-ratio: 4 / 5;
+      object-fit: cover;
+      border-radius: 10px;
+      background: var(--pink-soft);
+    }
+    .polaroid figcaption {
+      padding: 9px 4px 11px;
+      font-size: .82rem;
+      font-weight: 600;
+      line-height: 1.35;
+      color: var(--ink-soft);
+    }
+
+    @media (hover: hover) {
+      .polaroid:hover {
+        --r: 0deg;
+        --lift: -6px;
+        --s: 1.03;
+        box-shadow:
+          0 24px 40px -18px color-mix(in srgb, var(--ink) 55%, transparent),
+          0 2px 8px color-mix(in srgb, var(--ink) 10%, transparent);
+      }
+    }
+
+    /* Lời chúc */
+    .wish {
+      max-width: 34ch;
+      margin: 0 auto;
+      font-size: clamp(1rem, 3.9vw, 1.16rem);
+      font-weight: 500;
+      line-height: 1.7;
+    }
+    .wish em {
+      font-family: "Playfair Display", serif;
+      font-style: italic;
+      font-weight: 600;
+      color: var(--pink-deep);
+    }
+    .card.is-open .word { animation: wordIn .7s ease both; }
+
+    .signature {
+      margin: 12px 0 0;
+      font-family: "Playfair Display", serif;
+      font-style: italic;
+      font-size: 1.25rem;
+      color: var(--pink-deep);
+    }
+
+    /* Hiệu ứng tim bung ra khi mở thiệp */
+    .burst {
+      position: fixed;
+      inset: 0;
+      z-index: 5;
+      pointer-events: none;
+    }
+    .burst__piece {
+      position: absolute;
+      left: 50%;
+      top: 42%;
+      width: var(--size);
+      height: var(--size);
+      color: var(--c);
+      animation: burst 1.7s cubic-bezier(.15, .7, .3, 1) forwards;
+    }
+    .burst__piece.petal { height: calc(var(--size) * 1.15); }
+
+    /* ---------- Keyframes ---------- */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(22px); }
+      to   { opacity: 1; transform: none; }
+    }
+    @keyframes popIn {
+      from { opacity: 0; transform: translateY(30px) scale(.9); }
+      to   { opacity: 1; transform: none; }
+    }
+    @keyframes float {
+      0%, 100% { opacity: 1; transform: translateY(0); }
+      50%      { opacity: 1; transform: translateY(-8px); }
+    }
+    @keyframes coverOut {
+      to { opacity: 0; transform: translateY(-16px) scale(.96); }
+    }
+    @keyframes wordIn {
+      from { opacity: 0; filter: blur(4px); }
+      to   { opacity: 1; filter: blur(0); }
+    }
+    @keyframes pulse {
+      0%       { box-shadow: 0 0 0 0 color-mix(in srgb, var(--pink-deep) 45%, transparent); }
+      70%, 100% { box-shadow: 0 0 0 16px color-mix(in srgb, var(--pink-deep) 0%, transparent); }
+    }
+    @keyframes burst {
+      0%   { opacity: 1; transform: translate(-50%, -50%) scale(.3) rotate(0); }
+      70%  { opacity: 1; }
+      100% { opacity: 0; transform: translate(calc(-50% + var(--tx)), calc(-50% + var(--ty))) scale(1) rotate(var(--rot)); }
+    }
+
+    /* ---------- Điện thoại: 2 ảnh xếp dọc so le, gọn trong 1 màn hình để chụp ---------- */
+    @media (max-width: 719px) {
+      .photos {
+        flex-direction: column;
+        align-items: center;
+        gap: 0;
+        margin: 16px 0 12px;
+      }
+      .photo { --pw: min(50vw, 21.5vh); }
+      .photo:nth-child(1) { margin-right: calc(var(--pw) * .6); position: relative; z-index: 1; }
+      .photo:nth-child(2) {
+        margin-left: calc(var(--pw) * .6);
+        margin-top: calc(var(--pw) * -.3);
+      }
+      .photo:nth-child(2) .polaroid::before { left: 64%; }
+      .polaroid { padding: 7px 7px 0; border-radius: 14px; }
+      .polaroid figcaption { font-size: .74rem; padding: 7px 2px 9px; white-space: nowrap; }
+    }
+    @supports (height: 1svh) {
+      @media (max-width: 719px) {
+        .photo { --pw: min(50vw, 21.5svh); }
+      }
+    }
+
+    /* ---------- Máy tính / tablet ---------- */
+    @media (min-width: 720px) {
+      .card { max-width: 780px; padding: 46px 52px 38px; }
+      .card__eyebrow { font-size: .8rem; }
+      .card::before { inset: 12px; border-radius: calc(var(--radius) - 12px); }
+    }
+
+    /* Tôn trọng cài đặt giảm chuyển động của người dùng */
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: .01ms !important;
+        animation-delay: 0ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: .01ms !important;
+      }
+      .sky { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Lớp nền trái tim / cánh hoa rơi (tạo bằng JavaScript) -->
+  <div class="sky" id="sky" aria-hidden="true"></div>
+
+  <main class="stage">
+
+    <!-- ============ BÌA THIỆP (hiện khi mới vào trang) ============ -->
+    <section class="cover" id="cover">
+      <div class="envelope-float">
+        <div class="envelope" aria-hidden="true">
+          <div class="envelope__back"></div>
+          <div class="envelope__letter">20/10</div>
+          <div class="envelope__front"></div>
+          <div class="envelope__flap"></div>
+          <div class="envelope__seal">
+            <svg viewBox="0 0 24 24"><path d="M12 21s-7.5-4.6-9.6-9.2C.9 8.4 3 4.5 6.7 4.5c2.1 0 3.6 1.1 5.3 3 1.7-1.9 3.2-3 5.3-3 3.7 0 5.8 3.9 4.3 7.3C19.5 16.4 12 21 12 21z"/></svg>
+          </div>
+        </div>
+      </div>
+      <!-- Có thể đổi "Gửi em," thành tên cô ấy, ví dụ: "Gửi Oanh," -->
+      <p class="cover__to">Gửi em,</p>
+      <h1 class="cover__title">Chúc Mừng Ngày Phụ Nữ Việt Nam 20/10</h1>
+      <p class="cover__sub">Có một lời nhắn nhỏ đang chờ em mở ra…</p>
+      <button class="btn" id="openBtn" type="button">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-7.5-4.6-9.6-9.2C.9 8.4 3 4.5 6.7 4.5c2.1 0 3.6 1.1 5.3 3 1.7-1.9 3.2-3 5.3-3 3.7 0 5.8 3.9 4.3 7.3C19.5 16.4 12 21 12 21z"/></svg>
+        Mở thiệp
+      </button>
+    </section>
+
+    <!-- ============ NỘI DUNG THIỆP (hiện sau khi bấm "Mở thiệp") ============ -->
+    <article class="card" id="card" tabindex="-1" hidden>
+      <p class="card__eyebrow reveal" style="--i:0">Gửi em · 20.10.2026</p>
+
+      <h2 class="card__title reveal" style="--i:1">
+        Chúc Mừng Ngày<br />Phụ Nữ Việt Nam <span class="accent">20/10</span>
+      </h2>
+
+      <div class="divider reveal" style="--i:2" aria-hidden="true">
+        <svg viewBox="0 0 24 24"><path d="M12 21s-7.5-4.6-9.6-9.2C.9 8.4 3 4.5 6.7 4.5c2.1 0 3.6 1.1 5.3 3 1.7-1.9 3.2-3 5.3-3 3.7 0 5.8 3.9 4.3 7.3C19.5 16.4 12 21 12 21z"/></svg>
+      </div>
+
+      <div class="photos">
+        <!-- =====================================================
+             THAY ẢNH TẠI ĐÂY
+             - Đặt ảnh cùng thư mục với file HTML này rồi sửa src="..." thành tên file.
+             - Sửa chữ trong <figcaption> để đổi caption dưới ảnh.
+             - object-position: chỉnh vị trí khung cắt ảnh (ví dụ "50% 20%" = lấy phần phía trên).
+             ===================================================== -->
+        <div class="photo" style="--i:3">
+          <figure class="polaroid">
+            <img
+              src="1792296347334_36138600871854503_6975122130727382507_5ccb87ce68f2512c1daf1b043b9c71e5.jpg"
+              alt="Ảnh em bên bức tường gạch"
+              style="object-position: 44% 50%;" />
+            <figcaption>Dịu dàng rất riêng ♡</figcaption>
+          </figure>
+        </div>
+
+        <div class="photo" style="--i:4">
+          <figure class="polaroid">
+            <img
+              src="1792296368286_36138600871854503_6975122130727382507_5d5144ae943d77650ce80edd16f345d0.jpg"
+              alt="Ảnh em mặc áo dài cầm giấy khen"
+              style="object-position: 50% 8%;" />
+            <figcaption>Học giỏi lại còn xinh ✨</figcaption>
+          </figure>
+        </div>
+      </div>
+
+      <!-- =====================================================
+           THAY LỜI CHÚC TẠI ĐÂY
+           - Viết lời chúc mới vào giữa thẻ <p class="wish">…</p>.
+           - Phần nằm trong <em>…</em> sẽ được in nghiêng màu hồng để nhấn mạnh.
+           ===================================================== -->
+      <p class="wish" id="wish">
+        Chúc em luôn xinh đẹp, vui vẻ và gặp nhiều điều may mắn.
+        Luôn học giỏi nhé</em>
+      </p>
+
+      <!-- Chữ ký cuối thiệp -->
+      <p class="signature reveal" id="signature">— Anh</p>
+    </article>
+
+  </main>
+
+  <script>
+    (function () {
+      'use strict';
+
+      var HEART_SVG = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-7.5-4.6-9.6-9.2C.9 8.4 3 4.5 6.7 4.5c2.1 0 3.6 1.1 5.3 3 1.7-1.9 3.2-3 5.3-3 3.7 0 5.8 3.9 4.3 7.3C19.5 16.4 12 21 12 21z"/></svg>';
+      var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+      // Thời điểm (ms) bắt đầu hiện chữ lời chúc và khoảng cách giữa từng từ
+      var WORD_START = 900;
+      var WORD_STEP = 55;
+
+      function rand(min, max) { return Math.random() * (max - min) + min; }
+
+      /* ---------- 1. Nền trái tim & cánh hoa rơi ---------- */
+      function createSky() {
+        if (reduceMotion) return;
+        var sky = document.getElementById('sky');
+        var count = window.innerWidth < 600 ? 14 : 24; // ít phần tử để không lag trên điện thoại
+        var frag = document.createDocumentFragment();
+
+        for (var i = 0; i < count; i++) {
+          var isHeart = Math.random() < 0.4;
+          var dur = rand(10, 18);
+          var fall = document.createElement('span');
+          fall.className = 'fall';
+          fall.style.left = rand(0, 100) + '%';
+          fall.style.setProperty('--size', (isHeart ? rand(10, 18) : rand(9, 15)) + 'px');
+          fall.style.setProperty('--dur', dur + 's');
+          fall.style.setProperty('--delay', -rand(0, dur) + 's'); // delay âm để màn hình có sẵn hoa ngay khi tải
+          fall.style.setProperty('--sway', rand(3, 6) + 's');
+          fall.style.setProperty('--drift', rand(15, 40) + 'px');
+          fall.style.setProperty('--op', rand(0.45, 0.85).toFixed(2));
+
+          var inner = document.createElement('span');
+          inner.className = 'sway ' + (isHeart ? 'heart' : 'petal');
+          if (isHeart) inner.innerHTML = HEART_SVG;
+
+          fall.appendChild(inner);
+          frag.appendChild(fall);
+        }
+        sky.appendChild(frag);
+      }
+
+      /* ---------- 2. Tách lời chúc thành từng từ để hiện dần ---------- */
+      function splitWords(el) {
+        var index = 0;
+        (function walk(node) {
+          Array.prototype.slice.call(node.childNodes).forEach(function (child) {
+            if (child.nodeType === 1) { walk(child); return; }
+            if (child.nodeType !== 3) return;
+
+            var frag = document.createDocumentFragment();
+            child.textContent.split(/(\s+)/).forEach(function (part) {
+              if (!part) return;
+              if (/^\s+$/.test(part)) { frag.appendChild(document.createTextNode(' ')); return; }
+              var span = document.createElement('span');
+              span.className = 'word';
+              span.textContent = part;
+              span.style.animationDelay = (WORD_START + index++ * WORD_STEP) + 'ms';
+              frag.appendChild(span);
+            });
+            child.parentNode.replaceChild(frag, child);
+          });
+        })(el);
+        return index;
+      }
+
+      /* ---------- 3. Ảnh dự phòng nếu không tìm thấy file ảnh ---------- */
+      function placeholder() {
+        var svg =
+          '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 500">' +
+          '<defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1">' +
+          '<stop offset="0" stop-color="#fff0f3"/><stop offset="1" stop-color="#f9c9d5"/></linearGradient></defs>' +
+          '<rect width="400" height="500" fill="url(#g)"/>' +
+          '<path transform="translate(150 190) scale(4.2)" fill="#fff" d="M12 21s-7.5-4.6-9.6-9.2C.9 8.4 3 4.5 6.7 4.5c2.1 0 3.6 1.1 5.3 3 1.7-1.9 3.2-3 5.3-3 3.7 0 5.8 3.9 4.3 7.3C19.5 16.4 12 21 12 21z"/>' +
+          '</svg>';
+        return 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
+      }
+      function guardImages() {
+        document.querySelectorAll('.polaroid img').forEach(function (img) {
+          function fallback() { img.onerror = null; img.src = placeholder(); }
+          if (img.complete && img.naturalWidth === 0) fallback();
+          else img.onerror = fallback;
+        });
+      }
+
+      /* ---------- 4. Tim bung ra khi mở thiệp ---------- */
+      function burst() {
+        if (reduceMotion) return;
+        var colors = ['var(--pink)', 'var(--pink-deep)', '#ffd3dd', '#f9b8c8'];
+        var layer = document.createElement('div');
+        layer.className = 'burst';
+        var n = window.innerWidth < 600 ? 20 : 30;
+
+        for (var i = 0; i < n; i++) {
+          var angle = (i / n) * Math.PI * 2 + rand(-0.2, 0.2);
+          var dist = rand(110, Math.min(window.innerWidth, 640) * 0.55);
+          var isHeart = Math.random() < 0.6;
+          var p = document.createElement('span');
+          p.className = 'burst__piece' + (isHeart ? '' : ' petal');
+          p.style.setProperty('--tx', Math.cos(angle) * dist + 'px');
+          p.style.setProperty('--ty', Math.sin(angle) * dist + 'px');
+          p.style.setProperty('--rot', rand(-180, 180) + 'deg');
+          p.style.setProperty('--size', rand(10, 20) + 'px');
+          p.style.setProperty('--c', colors[i % colors.length]);
+          p.style.animationDelay = rand(0, 120) + 'ms';
+          if (isHeart) p.innerHTML = HEART_SVG;
+          else p.style.background = 'linear-gradient(135deg, #fff0f3, var(--pink))', p.style.borderRadius = '150% 0 150% 0';
+          layer.appendChild(p);
+        }
+        document.body.appendChild(layer);
+        setTimeout(function () { layer.remove(); }, 2200);
+      }
+
+      /* ---------- 5. Mở thiệp ---------- */
+      var cover = document.getElementById('cover');
+      var card = document.getElementById('card');
+      var btn = document.getElementById('openBtn');
+      var opened = false;
+
+      function openCard(skipIntro) {
+        if (opened) return;
+        opened = true;
+        btn.disabled = true;
+
+        var speed = (skipIntro || reduceMotion) ? 0 : 1;
+        cover.classList.add('is-opening');
+
+        setTimeout(function () { cover.classList.add('is-leaving'); }, 1000 * speed);
+        setTimeout(function () {
+          cover.hidden = true;
+          card.hidden = false;
+          void card.offsetWidth; // ép trình duyệt vẽ lại để animation chạy từ đầu
+          card.classList.add('is-open');
+          card.focus({ preventScroll: true });
+          burst();
+        }, 1500 * speed);
+      }
+
+      createSky();
+      guardImages();
+      var words = splitWords(document.getElementById('wish'));
+      // Chữ ký hiện ra sau khi lời chúc chạy xong
+      document.getElementById('signature').style.animationDelay = (WORD_START + words * WORD_STEP + 200) + 'ms';
+
+      btn.addEventListener('click', function () { openCard(false); });
+
+      // Mở thẳng thiệp nếu đường dẫn có #mo (ví dụ: thiep-20-10.html#mo)
+      if (location.hash === '#mo') openCard(true);
+    })();
+  </script>
+</body>
+</html>
